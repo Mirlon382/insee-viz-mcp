@@ -1,0 +1,509 @@
+{
+ "rows": [
+  {
+   "code": "01",
+   "name": "Ain",
+   "value": 116.49
+  },
+  {
+   "code": "02",
+   "name": "Aisne",
+   "value": 71.4
+  },
+  {
+   "code": "03",
+   "name": "Allier",
+   "value": 45.6
+  },
+  {
+   "code": "04",
+   "name": "Alpes-de-Haute-Provence",
+   "value": 24.14
+  },
+  {
+   "code": "05",
+   "name": "Hautes-Alpes",
+   "value": 25.54
+  },
+  {
+   "code": "06",
+   "name": "Alpes-Maritimes",
+   "value": 259.29
+  },
+  {
+   "code": "07",
+   "name": "Ardèche",
+   "value": 60.28
+  },
+  {
+   "code": "08",
+   "name": "Ardennes",
+   "value": 51.1
+  },
+  {
+   "code": "09",
+   "name": "Ariège",
+   "value": 31.75
+  },
+  {
+   "code": "10",
+   "name": "Aube",
+   "value": 51.82
+  },
+  {
+   "code": "11",
+   "name": "Aude",
+   "value": 61.54
+  },
+  {
+   "code": "12",
+   "name": "Aveyron",
+   "value": 32.02
+  },
+  {
+   "code": "13",
+   "name": "Bouches-du-Rhône",
+   "value": 406.84
+  },
+  {
+   "code": "14",
+   "name": "Calvados",
+   "value": 127.32
+  },
+  {
+   "code": "15",
+   "name": "Cantal",
+   "value": 25.22
+  },
+  {
+   "code": "16",
+   "name": "Charente",
+   "value": 59.03
+  },
+  {
+   "code": "17",
+   "name": "Charente-Maritime",
+   "value": 97.35
+  },
+  {
+   "code": "18",
+   "name": "Cher",
+   "value": 41.4
+  },
+  {
+   "code": "19",
+   "name": "Corrèze",
+   "value": 40.99
+  },
+  {
+   "code": "21",
+   "name": "Côte-d'Or",
+   "value": 61.35
+  },
+  {
+   "code": "22",
+   "name": "Côtes-d'Armor",
+   "value": 88.64
+  },
+  {
+   "code": "23",
+   "name": "Creuse",
+   "value": 20.76
+  },
+  {
+   "code": "24",
+   "name": "Dordogne",
+   "value": 45.95
+  },
+  {
+   "code": "25",
+   "name": "Doubs",
+   "value": 104.86
+  },
+  {
+   "code": "26",
+   "name": "Drôme",
+   "value": 79.85
+  },
+  {
+   "code": "27",
+   "name": "Eure",
+   "value": 100.08
+  },
+  {
+   "code": "28",
+   "name": "Eure-et-Loir",
+   "value": 73.64
+  },
+  {
+   "code": "29",
+   "name": "Finistère",
+   "value": 137.83
+  },
+  {
+   "code": "2A",
+   "name": "Corse-du-Sud",
+   "value": 41.35
+  },
+  {
+   "code": "2B",
+   "name": "Haute-Corse",
+   "value": 39.7
+  },
+  {
+   "code": "30",
+   "name": "Gard",
+   "value": 130.53
+  },
+  {
+   "code": "31",
+   "name": "Haute-Garonne",
+   "value": 230.8
+  },
+  {
+   "code": "32",
+   "name": "Gers",
+   "value": 30.78
+  },
+  {
+   "code": "33",
+   "name": "Gironde",
+   "value": 167.92
+  },
+  {
+   "code": "34",
+   "name": "Hérault",
+   "value": 199.52
+  },
+  {
+   "code": "35",
+   "name": "Ille-et-Vilaine",
+   "value": 163.74
+  },
+  {
+   "code": "36",
+   "name": "Indre",
+   "value": 31.93
+  },
+  {
+   "code": "37",
+   "name": "Indre-et-Loire",
+   "value": 100.58
+  },
+  {
+   "code": "38",
+   "name": "Isère",
+   "value": 173.79
+  },
+  {
+   "code": "39",
+   "name": "Jura",
+   "value": 51.68
+  },
+  {
+   "code": "40",
+   "name": "Landes",
+   "value": 46.35
+  },
+  {
+   "code": "41",
+   "name": "Loir-et-Cher",
+   "value": 51.86
+  },
+  {
+   "code": "42",
+   "name": "Loire",
+   "value": 161.48
+  },
+  {
+   "code": "43",
+   "name": "Haute-Loire",
+   "value": 45.85
+  },
+  {
+   "code": "44",
+   "name": "Loire-Atlantique",
+   "value": 214.32
+  },
+  {
+   "code": "45",
+   "name": "Loiret",
+   "value": 101.41
+  },
+  {
+   "code": "46",
+   "name": "Lot",
+   "value": 33.66
+  },
+  {
+   "code": "47",
+   "name": "Lot-et-Garonne",
+   "value": 61.97
+  },
+  {
+   "code": "48",
+   "name": "Lozère",
+   "value": 14.8
+  },
+  {
+   "code": "49",
+   "name": "Maine-et-Loire",
+   "value": 116.53
+  },
+  {
+   "code": "50",
+   "name": "Manche",
+   "value": 83.47
+  },
+  {
+   "code": "51",
+   "name": "Marne",
+   "value": 69.04
+  },
+  {
+   "code": "52",
+   "name": "Haute-Marne",
+   "value": 27.36
+  },
+  {
+   "code": "53",
+   "name": "Mayenne",
+   "value": 59.01
+  },
+  {
+   "code": "54",
+   "name": "Meurthe-et-Moselle",
+   "value": 139.73
+  },
+  {
+   "code": "55",
+   "name": "Meuse",
+   "value": 29.1
+  },
+  {
+   "code": "56",
+   "name": "Morbihan",
+   "value": 113.75
+  },
+  {
+   "code": "57",
+   "name": "Moselle",
+   "value": 169.02
+  },
+  {
+   "code": "58",
+   "name": "Nièvre",
+   "value": 29.68
+  },
+  {
+   "code": "59",
+   "name": "Nord",
+   "value": 455.69
+  },
+  {
+   "code": "60",
+   "name": "Oise",
+   "value": 141.76
+  },
+  {
+   "code": "61",
+   "name": "Orne",
+   "value": 45.23
+  },
+  {
+   "code": "62",
+   "name": "Pas-de-Calais",
+   "value": 218.9
+  },
+  {
+   "code": "63",
+   "name": "Puy-de-Dôme",
+   "value": 83.37
+  },
+  {
+   "code": "64",
+   "name": "Pyrénées-Atlantiques",
+   "value": 91.5
+  },
+  {
+   "code": "65",
+   "name": "Hautes-Pyrénées",
+   "value": 51.85
+  },
+  {
+   "code": "66",
+   "name": "Pyrénées-Orientales",
+   "value": 119.79
+  },
+  {
+   "code": "67",
+   "name": "Bas-Rhin",
+   "value": 243.37
+  },
+  {
+   "code": "68",
+   "name": "Haut-Rhin",
+   "value": 217.77
+  },
+  {
+   "code": "69",
+   "name": "Rhône",
+   "value": 587.28
+  },
+  {
+   "code": "70",
+   "name": "Haute-Saône",
+   "value": 43.63
+  },
+  {
+   "code": "71",
+   "name": "Saône-et-Loire",
+   "value": 64.03
+  },
+  {
+   "code": "72",
+   "name": "Sarthe",
+   "value": 91.22
+  },
+  {
+   "code": "73",
+   "name": "Savoie",
+   "value": 73.87
+  },
+  {
+   "code": "74",
+   "name": "Haute-Savoie",
+   "value": 193.6
+  },
+  {
+   "code": "75",
+   "name": "Paris",
+   "value": 20054.08
+  },
+  {
+   "code": "76",
+   "name": "Seine-Maritime",
+   "value": 200.76
+  },
+  {
+   "code": "77",
+   "name": "Seine-et-Marne",
+   "value": 245.55
+  },
+  {
+   "code": "78",
+   "name": "Yvelines",
+   "value": 643.76
+  },
+  {
+   "code": "79",
+   "name": "Deux-Sèvres",
+   "value": 62.58
+  },
+  {
+   "code": "80",
+   "name": "Somme",
+   "value": 91.64
+  },
+  {
+   "code": "81",
+   "name": "Tarn",
+   "value": 68.81
+  },
+  {
+   "code": "82",
+   "name": "Tarn-et-Garonne",
+   "value": 71.25
+  },
+  {
+   "code": "83",
+   "name": "Var",
+   "value": 185.56
+  },
+  {
+   "code": "84",
+   "name": "Vaucluse",
+   "value": 159.42
+  },
+  {
+   "code": "85",
+   "name": "Vendée",
+   "value": 105.12
+  },
+  {
+   "code": "86",
+   "name": "Vienne",
+   "value": 62.75
+  },
+  {
+   "code": "87",
+   "name": "Haute-Vienne",
+   "value": 67.47
+  },
+  {
+   "code": "88",
+   "name": "Vosges",
+   "value": 61.08
+  },
+  {
+   "code": "89",
+   "name": "Yonne",
+   "value": 44.95
+  },
+  {
+   "code": "90",
+   "name": "Territoire de Belfort",
+   "value": 229.75
+  },
+  {
+   "code": "91",
+   "name": "Essonne",
+   "value": 733.88
+  },
+  {
+   "code": "92",
+   "name": "Hauts-de-Seine",
+   "value": 9370.88
+  },
+  {
+   "code": "93",
+   "name": "Seine-Saint-Denis",
+   "value": 7116.8
+  },
+  {
+   "code": "94",
+   "name": "Val-de-Marne",
+   "value": 5796.24
+  },
+  {
+   "code": "95",
+   "name": "Val-d'Oise",
+   "value": 1019.49
+  },
+  {
+   "code": "971",
+   "name": "Guadeloupe",
+   "value": 235.58
+  },
+  {
+   "code": "972",
+   "name": "Martinique",
+   "value": 320.09
+  },
+  {
+   "code": "973",
+   "name": "Guyane",
+   "value": 3.45
+  },
+  {
+   "code": "974",
+   "name": "La Réunion",
+   "value": 352.01
+  },
+  {
+   "code": "976",
+   "name": "Mayotte",
+   "value": 686.0
+  }
+ ]
+}

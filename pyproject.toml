@@ -1,0 +1,27 @@
+[project]
+name = "insee-viz-mcp"
+version = "0.1.0"
+description = "MCP app that produces standardised Insee-style figures (map, bars, line) for an LLM"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastmcp>=4,<5",
+  "pydantic>=2.12",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+insee-viz-mcp = "insee_viz_mcp.server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/insee_viz_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

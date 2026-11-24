@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Figure Insee</title>
+<style>
+  :root {
+    --ink: #202021; --muted: #5D5D5E; --rule: #E4E4E4;
+    --bg: #FFFFFF; --chrome: #F7F7F8; --accent: #194E9B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: transparent; }
+  body {
+    font-family: Marianne, Inter, "Noto Sans", "DejaVu Sans", system-ui, sans-serif;
+    color: var(--ink); font-size: 13px; line-height: 1.45;
+  }
+  .frame { padding: 10px; }
+  .bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px 8px; border-bottom: 1px solid var(--rule);
+  }
+  .tag {
+    font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--accent); border: 1px solid #C9D9EF; background: #EDF3FB;
+    border-radius: 3px; padding: 2px 6px;
+  }
+  .spacer { flex: 1; }
+  button, a.btn {
+    font: inherit; font-size: 11.5px; color: var(--ink); background: var(--chrome);
+    border: 1px solid var(--rule); border-radius: 4px; padding: 4px 9px;
+    cursor: pointer; text-decoration: none; white-space: nowrap;
+  }
+  button:hover, a.btn:hover { background: #EFEFF1; }
+  .card { background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; margin-top: 10px; overflow: hidden; }
+  .card svg { display: block; width: 100%; height: auto; }
+  .caption { margin: 8px 2px 0; color: var(--muted); font-size: 11.5px; }
+  .warn { margin: 8px 2px 0; color: #8A4B00; background: #FFF6E8; border: 1px solid #F0D8B0;
+          border-radius: 4px; padding: 6px 9px; font-size: 11.5px; }
+  .warn ul { margin: 2px 0 0 16px; padding: 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; margin-top: 10px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); }
+  th { font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .files { margin-top: 8px; color: var(--muted); font-size: 10.5px; word-break: break-all; }
+  .empty { padding: 26px; text-align: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="bar">
+    <span class="tag" id="kind">figure</span>
+    <span class="spacer"></span>
+    <button id="btn-table" type="button">Données</button>
+    <button id="btn-svg" type="button">Télécharger le SVG</button>
+    <button id="btn-copy" type="button">Copier</button>
+  </div>
+  <div class="card" id="chart"><div class="empty">En attente d'une figure…</div></div>
+  <div class="caption" id="caption"></div>
+  <div class="warn" id="warn" hidden></div>
+  <div id="tablewrap" hidden></div>
+  <div class="files" id="files"></div>
+</div>
+
+<script type="module">
+  const el = (id) => document.getElementById(id);
+  let current = null;
+
+  function setKind(kind) {
+    const names = { map: "carte", bars: "barres", line: "courbe" };
+    el("kind").textContent = names[kind] || "figure";
+  }
+
+  function render(payload) {
+    if (!payload) return;
+    current = typeof payload === "string" ? JSON.parse(payload) : payload;
+    setKind(current.kind);
+
+    const svg = (current.svg || "").replace(/^<\?xml[^>]*\?>\s*/, "");
+    if (svg) {
+      el("chart").innerHTML = svg;          // server-rendered, trusted server output
+    } else {
+      el("chart").innerHTML = '<div class="empty">Figure indisponible.</div>';
+    }
+
+    const notes = current.notes || {};
+    const parts = [];
+    if (notes.lecture) parts.push("Lecture : " + notes.lecture);
+    if (notes.champ) parts.push("Champ : " + notes.champ);
+    if (notes.source) parts.push("Source : " + notes.source);
+    el("caption").textContent = parts.join("  ·  ");
+
+    const warnings = current.warnings || [];
+    if (warnings.length) {
+      el("warn").hidden = false;
+      el("warn").innerHTML = "À corriger pour une figure conforme :<ul>" +
+        warnings.map(w => `<li>${w}</li>`).join("") + "</ul>";
+    } else {
+      el("warn").hidden = true;
+    }
+
+    const table = current.table;
+    if (table) {
+      const head = (table.columns || []).map((c, i) =>
+        `<th class="${i ? 'num' : ''}">${c}</th>`).join("");
+      const body = (table.rows || []).map(r =>
+        "<tr>" + r.map((c, i) => `<td class="${i ? 'num' : ''}">${c ?? ""}</td>`).join("") + "</tr>").join("");
+      el("tablewrap").innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    }
+
+    const files = current.files || {};
+    el("files").textContent = files.svg ? "Fichiers : " + Object.values(files).filter(Boolean).join("  ·  ") : "";
+  }
+
+  el("btn-table").addEventListener("click", () => {
+    const w = el("tablewrap");
+    w.hidden = !w.hidden;
+  });
+
+  el("btn-svg").addEventListener("click", () => {
+    if (!current?.svg) return;
+    const blob = new Blob([current.svg], { type: "image/svg+xml" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = (current.slug || "figure") + ".svg";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  });
+
+  el("btn-copy").addEventListener("click", async () => {
+    if (!current?.svg) return;
+    try {
+      await navigator.clipboard.writeText(current.svg);
+      el("btn-copy").textContent = "Copié";
+      setTimeout(() => (el("btn-copy").textContent = "Copier"), 1500);
+    } catch (_) { /* clipboard may be denied */ }
+  });
+
+  // dev hook: allows previewing the viewer without an MCP Apps host
+  window.__inseeRender = render;
+
+  const resize = () => {
+    try { app.sendSizeChanged?.({ width: document.body.scrollWidth, height: document.body.scrollHeight }); } catch (_) {}
+  };
+
+  let app;
+  try {
+    const sdk = await import("https://unpkg.com/@modelcontextprotocol/ext-apps@0.4.0/app-with-deps");
+    app = new sdk.App({ name: "Insee figures", version: "0.1.0" });
+    app.ontoolresult = (result) => render(result?.structuredContent ?? result?.structured_content ?? result);
+    await app.connect();
+    new ResizeObserver(resize).observe(document.body);
+    resize();
+  } catch (err) {
+    el("chart").innerHTML = '<div class="empty">Client sans support MCP Apps : utilisez le fichier SVG renvoyé par l’outil.</div>';
+  }
+</script>
+</body>
+</html>
