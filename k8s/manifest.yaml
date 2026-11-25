@@ -59,7 +59,7 @@ spec:
         - name: insee-viz
           image: docker.io/mirlon382/insee-viz-mcp:0.2.0
           # Pin instead, for a reproducible rollout:
-          # image: docker.io/mirlon382/insee-viz-mcp@sha256:3ac188e060092d59b5eb8ccc9b535abed1d0b65494f38f1b2328c8277d86aabc
+          # image: docker.io/mirlon382/insee-viz-mcp@sha256:91c441958dd75d01f1f970665ce42352eb8c467c8dcb5a76f79686eff00c82e7
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000        # matches Service.targetPort

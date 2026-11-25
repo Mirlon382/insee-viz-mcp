@@ -2,6 +2,10 @@
 
 **Three figure forms, one editorial contract, zero chart junk — rendered server-side so the model cannot improvise.**
 
+[![CI](https://github.com/Mirlon382/insee-viz-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Mirlon382/insee-viz-mcp/actions/workflows/ci.yml)
+[![image](https://img.shields.io/badge/image-mirlon382%2Finsee--viz--mcp-blue)](https://hub.docker.com/r/mirlon382/insee-viz-mcp)
+[![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 ![The figure viewer inside an MCP Apps host](docs/app-view.png)
 
 Ask a general-purpose LLM for "a chart" and you get a gradient donut with a
@@ -10,6 +14,10 @@ the same editorial block (`Lecture / Champ / Source`). This MCP server encodes
 that grammar: it picks the form from the shape of the data, validates the
 metadata, and renders deterministic SVG. The model chooses nothing visual — it
 fills a typed contract.
+
+**Unofficial.** This is not an Insee product and carries no endorsement: the figures imitate
+Insee's published grammar, and the optional `meta.brand` wordmark exists only for reproducing a
+figure Insee itself published.
 
 Built on FastMCP 4 and the MCP Apps extension, laid out the way
 [McpSquelette](https://github.com/Mirlon382/McpSquelette) lays out a server:
@@ -397,6 +405,8 @@ its healthcheck and draws a figure inside the container.
 
 ```
 .env.example                  # every variable, documented — copy to .env
+LICENSE                       # MIT
+SECURITY.md                   # what this server does and does not protect
 .dockerignore                 # keeps the build context to what the image needs
 .github/workflows/ci.yml      # ruff + pytest on 3.12/3.13, then the image healthcheck
 .pre-commit-config.yaml       # ruff on every commit
@@ -433,6 +443,22 @@ Adding a tool follows the skeleton's rule: models in `models/`, the function in
 `tools/<name>/tools.py`, the test in `tests/`, and one line in
 `tools/__init__.py`. Registration lives only there — an unregistered tool is the
 only "disabled" the protocol guarantees.
+
+## Licence and attribution
+
+The code is **MIT** — see [LICENSE](LICENSE).
+
+It ships third-party material, and a public copy has to say so:
+
+| What | Source | Licence |
+|---|---|---|
+| `departements.geojson`, `regions.geojson` | [france-geojson](https://github.com/gregoiredavid/france-geojson), derived from IGN ADMIN-EXPRESS (simplified shapes) | Licence Ouverte 2.0 (Etalab) — attribution required |
+| `examples/data/*.json` and the numbers in `docs/*.png` | Insee — each file names its publication | Licence Ouverte 2.0 — attribution required |
+| `docs/app-view.png`, the figure screenshots | output of this server, over the data above | as the data above |
+
+Every rendered figure carries its `Source :` line by design, which is what the Insee licence asks of
+a reuse. No Insee or IGN logo is bundled, and nothing here implies endorsement: see the disclaimer at
+the top.
 
 ## Limits (deliberate, prototype scope)
 
