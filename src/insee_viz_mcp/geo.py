@@ -84,7 +84,4 @@ def bounds(level: str = "departement") -> tuple[float, float, float, float]:
 
 
 def names(level: str = "departement") -> dict[str, str]:
-    return {
-        str(f["properties"].get("code", "")).strip(): f["properties"].get("nom", "")
-        for f in features(level)
-    }
+    return {str(f["properties"].get("code", "")).strip(): f["properties"].get("nom", "") for f in features(level)}

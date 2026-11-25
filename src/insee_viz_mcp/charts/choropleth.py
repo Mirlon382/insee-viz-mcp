@@ -4,7 +4,7 @@ horizontal swatch legend, no data in grey."""
 from __future__ import annotations
 
 from .. import geo
-from ..models import MapSpec
+from ..models.figures import MapSpec
 from ..style import BLUE_CLASSES, MARGIN, MUTED, NO_DATA, WIDTH, fr_num
 from ..svgkit import document, header, notes, rect, text
 
@@ -51,7 +51,7 @@ def _hex_to_rgb(color: str) -> tuple[int, int, int]:
 
 
 def _rgb_to_hex(rgb: tuple[int, int, int]) -> str:
-    return "#%02X%02X%02X" % rgb
+    return f"#{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X}"
 
 
 def _mix(a: str, b: str, t: float) -> str:
@@ -104,12 +104,12 @@ def render_map(spec: MapSpec) -> str:
                 pts = [project(pt) for pt in ring]
                 if len(pts) < 3:
                     continue
-                d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}" + "".join(
-                    f"L{x:.1f},{y:.1f}" for x, y in pts[1:]
-                ) + "Z"
+                d = f"M{pts[0][0]:.1f},{pts[0][1]:.1f}" + "".join(f"L{x:.1f},{y:.1f}" for x, y in pts[1:]) + "Z"
                 d_parts.append(d)
         if d_parts:
-            parts.append(f'<g><path d="{" ".join(d_parts)}" fill="{fill}" stroke="#FFFFFF" stroke-width="0.7"><title>{label}</title></path></g>')
+            parts.append(
+                f'<g><path d="{" ".join(d_parts)}" fill="{fill}" stroke="#FFFFFF" stroke-width="0.7"><title>{label}</title></path></g>'
+            )
 
     # codes the LLM supplied that this geography does not know
     known = {code.upper() for code, _ in all_paths}
@@ -123,7 +123,16 @@ def render_map(spec: MapSpec) -> str:
         parts.append(rect(MARGIN + i * swatch_w + 1, legend_y, swatch_w - 2, swatch_h, color))
     for i, label in enumerate(_class_labels(breaks, spec)):
         for j, chunk in enumerate(_wrap_label(label, 22)):
-            parts.append(text(MARGIN + i * swatch_w + swatch_w / 2, legend_y + swatch_h + 14 + j * 12, chunk, size=10, fill=MUTED, anchor="middle"))
+            parts.append(
+                text(
+                    MARGIN + i * swatch_w + swatch_w / 2,
+                    legend_y + swatch_h + 14 + j * 12,
+                    chunk,
+                    size=10,
+                    fill=MUTED,
+                    anchor="middle",
+                )
+            )
     if spec.thresholds:
         method_note = "Seuils fixes"
     else:
@@ -141,11 +150,12 @@ def render_map(spec: MapSpec) -> str:
 
 def _class_labels(breaks: list[float], spec: MapSpec) -> list[str]:
     """Human-readable ranges, Insee phrasing: 'Moins de 50', 'De 50 à moins de 75'."""
+
     def num(value: float) -> str:
         return fr_num(value, spec.decimals)
 
     labels = [f"Moins de {num(breaks[0])}"]
-    for low, high in zip(breaks, breaks[1:]):
+    for low, high in zip(breaks, breaks[1:], strict=False):
         labels.append(f"De {num(low)} à moins de {num(high)}")
     labels.append(f"{num(breaks[-1])} et plus")
     return labels

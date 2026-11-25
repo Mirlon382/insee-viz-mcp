@@ -7,7 +7,7 @@ title, no value labels (reading is done on the axis, as in Insee Première).
 
 from __future__ import annotations
 
-from ..models import BarSpec
+from ..models.figures import BarSpec
 from ..style import (
     AXIS,
     BAR_MAIN,
@@ -18,8 +18,8 @@ from ..style import (
     NBSP_NARROW,
     SERIES,
     WIDTH,
-    esc,
     axis_num,
+    esc,
     fr_num,
     nice_ticks,
     wrap,
@@ -89,11 +89,13 @@ def render_bars(spec: BarSpec) -> str:
     domain_lo, domain_hi = ticks[0], ticks[-1]
 
     if spec.orientation == "horizontal":
-        label_col = min(max(90.0, max((max((len(x) for x in v), default=0) for v in wrapped.values()), default=8) * 6.9), 330.0)
+        label_col = min(
+            max(90.0, max((max((len(x) for x in v), default=0) for v in wrapped.values()), default=8) * 6.9), 330.0
+        )
         if max_lines > 1:
             label_col += 10
         label_values = [_value_label(spec, v) for v in values] if spec.show_values and not grouped else []
-        value_space = (max((len(v) for v in label_values), default=0) * 6.4 + 14)
+        value_space = max((len(v) for v in label_values), default=0) * 6.4 + 14
         plot_x0 = MARGIN + label_col + 14
         plot_x1 = WIDTH - MARGIN - value_space
         sx = Scale(domain_lo, domain_hi, plot_x0, plot_x1)
@@ -122,16 +124,37 @@ def render_bars(spec: BarSpec) -> str:
                 for k, name in enumerate(names):
                     value = next(r.value for r in rows if r.label == lab and r.series == name)
                     y = cy - total_h / 2 + k * (GROUP_BAR_H + GROUP_GAP)
-                    parts.append(_bar_geom(min(sx(0), sx(value)), y, abs(sx(value) - sx(0)), GROUP_BAR_H, SERIES[k % len(SERIES)], f"{lab} — {name}", spec, value))
+                    parts.append(
+                        _bar_geom(
+                            min(sx(0), sx(value)),
+                            y,
+                            abs(sx(value) - sx(0)),
+                            GROUP_BAR_H,
+                            SERIES[k % len(SERIES)],
+                            f"{lab} — {name}",
+                            spec,
+                            value,
+                        )
+                    )
             else:
                 value = next(r.value for r in rows if r.label == lab)
                 color = BAR_MAIN
                 if spec.highlight:
                     color = BAR_MAIN if lab == spec.highlight else BAR_SOFT
-                parts.append(_bar_geom(min(sx(0), sx(value)), cy - 9, abs(sx(value) - sx(0)), 18, color, lab, spec, value))
+                parts.append(
+                    _bar_geom(min(sx(0), sx(value)), cy - 9, abs(sx(value) - sx(0)), 18, color, lab, spec, value)
+                )
                 if spec.show_values:
                     anchor = "start" if value >= 0 else "end"
-                    parts.append(text(sx(value) + (6 if value >= 0 else -6), cy + 4, _value_label(spec, value), size=11, anchor=anchor))
+                    parts.append(
+                        text(
+                            sx(value) + (6 if value >= 0 else -6),
+                            cy + 4,
+                            _value_label(spec, value),
+                            size=11,
+                            anchor=anchor,
+                        )
+                    )
         plot_bottom += 10
 
     else:  # vertical
@@ -156,11 +179,26 @@ def render_bars(spec: BarSpec) -> str:
                 for k, name in enumerate(names):
                     value = next(r.value for r in rows if r.label == lab and r.series == name)
                     x = cx - bar_w / 2 + k * inner
-                    parts.append(_bar_geom(x, min(sy(0), sy(value)), inner - 3, abs(sy(value) - sy(0)), SERIES[k % len(SERIES)], f"{lab} — {name}", spec, value))
+                    parts.append(
+                        _bar_geom(
+                            x,
+                            min(sy(0), sy(value)),
+                            inner - 3,
+                            abs(sy(value) - sy(0)),
+                            SERIES[k % len(SERIES)],
+                            f"{lab} — {name}",
+                            spec,
+                            value,
+                        )
+                    )
             else:
                 value = next(r.value for r in rows if r.label == lab)
                 color = BAR_MAIN if (not spec.highlight or lab == spec.highlight) else BAR_SOFT
-                parts.append(_bar_geom(cx - bar_w / 2, min(sy(0), sy(value)), bar_w, abs(sy(value) - sy(0)), color, lab, spec, value))
+                parts.append(
+                    _bar_geom(
+                        cx - bar_w / 2, min(sy(0), sy(value)), bar_w, abs(sy(value) - sy(0)), color, lab, spec, value
+                    )
+                )
                 if spec.show_values:
                     parts.append(text(cx, sy(value) - 7, _value_label(spec, value), size=11, anchor="middle"))
             for j, chunk in enumerate(wrapped[lab]):

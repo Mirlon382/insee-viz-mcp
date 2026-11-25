@@ -11,20 +11,20 @@ from __future__ import annotations
 import json
 import shutil
 import subprocess
-import sys
 from pathlib import Path
 
+from insee_viz_mcp.charts import render_bars, render_line, render_map
+from insee_viz_mcp.models.figures import BarRow, BarSpec, FigureMeta, LineSpec, MapRow, MapSpec, Point, Series
+
 ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT.parent / "src"))
-
-from insee_viz_mcp.charts import render_bars, render_line, render_map  # noqa: E402
-from insee_viz_mcp.models import BarRow, BarSpec, FigureMeta, LineSpec, MapRow, MapSpec, Point, Series  # noqa: E402
-
 DATA = ROOT / "data"
 OUT = ROOT / "out"
 OUT.mkdir(exist_ok=True)
 
-METRO = {str(f["properties"]["code"]) for f in json.loads((ROOT.parent / "src/insee_viz_mcp/data/departements.geojson").read_text())["features"]}
+METRO = {
+    str(f["properties"]["code"])
+    for f in json.loads((ROOT.parent / "src/insee_viz_mcp/data/departements.geojson").read_text())["features"]
+}
 
 
 def raster(svg_path: Path) -> Path | None:
@@ -41,7 +41,8 @@ def raster(svg_path: Path) -> Path | None:
 
 def build_map() -> Path:
     rows = [
-        MapRow(**row) for row in json.loads((DATA / "densite_departements_2022.json").read_text())["rows"]
+        MapRow(**row)
+        for row in json.loads((DATA / "densite_departements_2022.json").read_text())["rows"]
         if str(row["code"]) in METRO
     ]
     spec = MapSpec(
@@ -86,10 +87,7 @@ def build_bars() -> Path:
 
 def build_line() -> Path:
     raw = json.loads((DATA / "matieres_premieres.json").read_text())
-    series = [
-        Series(label=s["label"], points=[Point(**p) for p in s["points"]])
-        for s in raw["series"]
-    ]
+    series = [Series(label=s["label"], points=[Point(**p) for p in s["points"]]) for s in raw["series"]]
     spec = LineSpec(
         series=series,
         decimals=0,
@@ -108,7 +106,7 @@ def build_line() -> Path:
 
 def gallery(svgs: list[Path], pngs: list[Path | None]) -> Path:
     cards = []
-    for svg, png in zip(svgs, pngs):
+    for svg, png in zip(svgs, pngs, strict=False):
         cards.append(
             f'<section><div class="card">{svg.read_text(encoding="utf-8")}</div>'
             f'<p class="files">{svg.name} · <a href="{png.name if png else "#"}">PNG</a></p></section>'
@@ -128,7 +126,7 @@ def gallery(svgs: list[Path], pngs: list[Path | None]) -> Path:
 </style></head><body>
 <header><h1>Prototype « figures Insee » — MCP app</h1>
 <p class="lead">Trois formes, un seul bloc éditorial : carte choroplèthe, barres classées, courbe. Rendu 100 % serveur, style fixé par le code.</p></header>
-<main>{''.join(cards)}</main></body></html>"""
+<main>{"".join(cards)}</main></body></html>"""
     path = OUT / "gallery.html"
     path.write_text(html, encoding="utf-8")
     return path
@@ -137,6 +135,6 @@ def gallery(svgs: list[Path], pngs: list[Path | None]) -> Path:
 if __name__ == "__main__":
     svgs = [build_map(), build_bars(), build_line()]
     pngs = [raster(svg) for svg in svgs]
-    for svg, png in zip(svgs, pngs):
+    for svg, png in zip(svgs, pngs, strict=False):
         print(f"{svg.name}  ->  {png.name if png else 'no rasteriser'}")
     print(gallery(svgs, pngs))

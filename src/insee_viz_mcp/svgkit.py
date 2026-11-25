@@ -32,10 +32,12 @@ def text(
         parts.append(f'font-style="{style}"')
     if opacity is not None:
         parts.append(f'opacity="{opacity}"')
-    return f'<text {" ".join(parts)}>{esc(value)}</text>'
+    return f"<text {' '.join(parts)}>{esc(value)}</text>"
 
 
-def line(x1: float, y1: float, x2: float, y2: float, color: str = GRID, width: float = 1, dash: str | None = None) -> str:
+def line(
+    x1: float, y1: float, x2: float, y2: float, color: str = GRID, width: float = 1, dash: str | None = None
+) -> str:
     extra = f' stroke-dasharray="{dash}"' if dash else ""
     return (
         f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
@@ -43,7 +45,9 @@ def line(x1: float, y1: float, x2: float, y2: float, color: str = GRID, width: f
     )
 
 
-def rect(x: float, y: float, w: float, h: float, fill: str, stroke: str | None = None, stroke_width: float = 0, rx: float = 0) -> str:
+def rect(
+    x: float, y: float, w: float, h: float, fill: str, stroke: str | None = None, stroke_width: float = 0, rx: float = 0
+) -> str:
     extra = ""
     if stroke:
         extra += f' stroke="{stroke}" stroke-width="{stroke_width}"'

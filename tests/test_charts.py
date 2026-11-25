@@ -1,10 +1,16 @@
+"""The renderers: the SVG a figure must contain, and the inputs they refuse.
+
+These bypass the MCP layer on purpose -- spec in, SVG out -- so a failure points at the drawing
+rather than at the transport. The protocol-level tests live in `test_server.py`.
+"""
+
 import xml.etree.ElementTree as ET
 
 import pytest
 from pydantic import ValidationError
 
 from insee_viz_mcp.charts import render_bars, render_line, render_map
-from insee_viz_mcp.models import BarRow, BarSpec, FigureMeta, LineSpec, MapRow, MapSpec, Point, Series
+from insee_viz_mcp.models.figures import BarRow, BarSpec, FigureMeta, LineSpec, MapRow, MapSpec, Point, Series
 from insee_viz_mcp.style import fr_num, nice_ticks, slugify
 
 META = FigureMeta(
@@ -46,7 +52,11 @@ def _bars_spec(**overrides) -> BarSpec:
         BarRow(label="Petites villes", value=3.4),
         BarRow(label="Rural non périurbain – habitat dispersé", value=8.1),
     ]
-    meta = FigureMeta(title="L'accès aux services varie de 2,3 à 8,1 minutes", unit="en minutes", source="Insee, BPE 2025.")
+    meta = FigureMeta(
+        title="L'accès aux services varie de 2,3 à 8,1 minutes",
+        unit="en minutes",
+        source="Insee, BPE 2025.",
+    )
     kwargs = dict(rows=rows, meta=meta, decimals=1, value_suffix="min", highlight="Petites villes")
     kwargs.update(overrides)
     return BarSpec(**kwargs)
@@ -66,12 +76,14 @@ def test_bars_render_insee_skeleton():
 
 def test_bars_reject_more_than_three_series():
     with pytest.raises(ValidationError):
-        _bars_spec(rows=[
-            BarRow(label="A", value=1, series="S1"),
-            BarRow(label="A", value=2, series="S2"),
-            BarRow(label="A", value=3, series="S3"),
-            BarRow(label="A", value=4, series="S4"),
-        ])
+        _bars_spec(
+            rows=[
+                BarRow(label="A", value=1, series="S1"),
+                BarRow(label="A", value=2, series="S2"),
+                BarRow(label="A", value=3, series="S3"),
+                BarRow(label="A", value=4, series="S4"),
+            ]
+        )
 
 
 def test_vertical_bars_render():
@@ -108,7 +120,9 @@ def test_line_render_skeleton():
 def test_line_breaks_on_missing_period():
     spec = _line_spec()
     # drop three months in the middle: the line must be cut, not interpolated
-    spec.series[0].points = [p for p in spec.series[0].points if p.x not in {"2024-05", "2024-06", "2024-07"}]
+    spec.series[0].points = [
+        point for point in spec.series[0].points if point.x not in {"2024-05", "2024-06", "2024-07"}
+    ]
     svg = render_line(spec)
     assert svg.count("<path") == 3
 

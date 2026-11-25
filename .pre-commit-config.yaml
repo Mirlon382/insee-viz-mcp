@@ -1,0 +1,9 @@
+# Install once with: uv run pre-commit install
+# Then every commit lints and formats only the files it touches.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format

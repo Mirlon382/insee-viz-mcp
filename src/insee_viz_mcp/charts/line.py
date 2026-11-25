@@ -7,7 +7,7 @@ import math
 import re
 from statistics import median
 
-from ..models import LineSpec, Series
+from ..models.figures import LineSpec, Series
 from ..style import AXIS, GRID, MARGIN, MUTED, SERIES, WIDTH, axis_num, esc, nice_ticks
 from ..svgkit import baseline, document, header, line, notes, text
 
@@ -43,7 +43,9 @@ def render_line(spec: LineSpec) -> str:
     raw_x = [p.x for s in series for p in s.points]
     ordinals = [_to_ordinal(x) for x in raw_x]
     temporal = all(o is not None for o in ordinals)
-    monthly = any(PERIOD_MONTH.match(str(p.x).strip()) or PERIOD_QUARTER.match(str(p.x).strip()) for s in series for p in s.points)
+    monthly = any(
+        PERIOD_MONTH.match(str(p.x).strip()) or PERIOD_QUARTER.match(str(p.x).strip()) for s in series for p in s.points
+    )
 
     if temporal:
         x_domain = (float(min(ordinals)), float(max(ordinals)))  # type: ignore[arg-type]
@@ -135,7 +137,16 @@ def render_line(spec: LineSpec) -> str:
     if spec.reference is not None:
         y = sy(spec.reference)
         parts.append(line(plot_x0, y, plot_x1, y, color="#8A8A8A", width=1, dash="5 4"))
-        parts.append(text(plot_x1, y - 6, spec.reference_label or axis_num(spec.reference, spec.decimals), size=10.5, fill=MUTED, anchor="end"))
+        parts.append(
+            text(
+                plot_x1,
+                y - 6,
+                spec.reference_label or axis_num(spec.reference, spec.decimals),
+                size=10.5,
+                fill=MUTED,
+                anchor="end",
+            )
+        )
 
     # -- series -------------------------------------------------------------
     labels_to_place: list[tuple[float, int]] = []
@@ -145,9 +156,15 @@ def render_line(spec: LineSpec) -> str:
         coords = [(px(p.x), sy(p.y)) for p in points]
 
         # a genuine hole in the series breaks the line
-        step = median([abs(xpos(b.x) - xpos(a.x)) for a, b in zip(points, points[1:])]) if len(points) > 1 else 0
+        step = (
+            median([abs(xpos(b.x) - xpos(a.x)) for a, b in zip(points, points[1:], strict=False)])
+            if len(points) > 1
+            else 0
+        )
         segments: list[list[tuple[float, float]]] = [[coords[0]] if coords else []]
-        for (prev_pt, prev_xy), (pt, xy) in zip(zip(points, coords), zip(points[1:], coords[1:])):
+        paired = zip(points, coords, strict=False)
+        shifted = zip(points[1:], coords[1:], strict=False)
+        for (prev_pt, _prev_xy), (pt, xy) in zip(paired, shifted, strict=False):
             if temporal and step and abs(xpos(pt.x) - xpos(prev_pt.x)) > step * 1.8:
                 segments.append([])
             segments[-1].append(xy)
@@ -162,7 +179,9 @@ def render_line(spec: LineSpec) -> str:
             )
 
         lx, ly = coords[-1]
-        parts.append(f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="3.6" fill="{color}" stroke="#FFFFFF" stroke-width="1.4"/>')
+        parts.append(
+            f'<circle cx="{lx:.1f}" cy="{ly:.1f}" r="3.6" fill="{color}" stroke="#FFFFFF" stroke-width="1.4"/>'
+        )
         if end_labels:
             labels_to_place.append((ly, i))
 

@@ -14,11 +14,11 @@ import unicodedata
 # Insee uses its own "Marianne" typeface; fall back gracefully.
 FONT = "Marianne, Inter, 'Noto Sans', 'DejaVu Sans', sans-serif"
 
-INK = "#202021"        # titles, tick labels
-MUTED = "#5D5D5E"      # notes, axis unit
-GRID = "#E4E4E4"       # horizontal gridlines
-AXIS = "#B9B9B9"       # baseline only
-NO_DATA = "#CFCFCF"    # "non disponible" on maps
+INK = "#202021"  # titles, tick labels
+MUTED = "#5D5D5E"  # notes, axis unit
+GRID = "#E4E4E4"  # horizontal gridlines
+AXIS = "#B9B9B9"  # baseline only
+NO_DATA = "#CFCFCF"  # "non disponible" on maps
 WHITE = "#FFFFFF"
 
 # Categorical series (sampled from Insee Première / Informations rapides).
@@ -31,7 +31,7 @@ BAR_MAIN = "#194E9B"
 BAR_SOFT = "#9AD1FE"
 
 # --- Geometry ---------------------------------------------------------------
-WIDTH = 920           # every figure is 920 px wide (Insee web images are 900)
+WIDTH = 920  # every figure is 920 px wide (Insee web images are 900)
 MARGIN = 40
 
 NBSP_NARROW = "\u202f"  # French thousands separator
@@ -40,12 +40,7 @@ NBSP_NARROW = "\u202f"  # French thousands separator
 def esc(value: object) -> str:
     """Escape text for SVG/XML."""
     s = str(value)
-    return (
-        s.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-    )
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 
 def fr_num(value: float, decimals: int = 0) -> str:
@@ -85,9 +80,9 @@ def nice_ticks(lo: float, hi: float, target: int = 5) -> list[float]:
     span = hi - lo
     raw = span / max(target - 1, 1)
     exponent = math.floor(math.log10(raw)) if raw > 0 else 0
-    step = 10 ** exponent
+    step = 10**exponent
     for multiplier in (1, 2, 2.5, 5, 10):
-        candidate = multiplier * 10 ** exponent
+        candidate = multiplier * 10**exponent
         if span / candidate <= target:
             step = candidate
             break
@@ -116,8 +111,6 @@ def wrap(text: str, width: int = 108) -> list[str]:
 
 def slugify(text: str, max_len: int = 60) -> str:
     """Filesystem-safe slug, accents removed."""
-    ascii_text = (
-        unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
-    )
+    ascii_text = unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", ascii_text).strip("-").lower()
     return (slug[:max_len].rstrip("-")) or "figure"

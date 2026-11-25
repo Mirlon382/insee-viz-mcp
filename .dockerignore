@@ -1,0 +1,17 @@
+.git
+.gitignore
+.github
+.venv
+.pytest_cache
+.ruff_cache
+.pre-commit-config.yaml
+state
+docs
+examples
+tests
+skills
+*.pyc
+__pycache__
+.env
+.env.*
+!.env.example

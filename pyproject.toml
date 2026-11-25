@@ -1,27 +1,68 @@
 [project]
 name = "insee-viz-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP app that produces standardised Insee-style figures (map, bars, line) for an LLM"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
-  "fastmcp>=4,<5",
-  "pydantic>=2.12",
+    "fastmcp>=4.0.0,<5",
+    "pydantic>=2.12",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0",
+    "uvicorn>=0.30",
 ]
 
-[dependency-groups]
-dev = ["pytest>=8"]
+[project.scripts]
+insee-viz-mcp = "insee_viz_mcp.server:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[project.scripts]
-insee-viz-mcp = "insee_viz_mcp.server:main"
-
 [tool.hatch.build.targets.wheel]
 packages = ["src/insee_viz_mcp"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pre-commit>=4.5.1",
+    "ruff>=0.15.4",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# E501 is off: the formatter owns code width, and what it cannot wrap here is deliberate copy --
+# French figure titles, Insee wording quoted in the tools' messages, and single SVG attributes.
+ignore = ["E501"]
+select = [
+    "E", # pycodestyle errors
+    "F", # pyflakes
+    "I", # isort
+    "B", # flake8-bugbear - catches common bug patterns
+    "UP", # pyupgrade - enforces modern syntax, including `str | None` over `Optional[str]`
+    # Only the call-site rule of flake8-boolean-trap: a bare `True` in a call reads as nothing.
+    # FBT001/FBT002 are left off because a tool's boolean parameter is a named field of its schema.
+    "FBT003", # flake8-boolean-trap
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# B008 forbids calls in argument defaults. These build a dependency marker, not a value: FastMCP
+# resolves them per request, so the default is never what the function receives.
+extend-immutable-calls = [
+    "fastmcp.dependencies.Depends",
+    "fastmcp.dependencies.CurrentContext",
+    "fastmcp.server.dependencies.Depends",
+    "fastmcp.server.dependencies.CurrentContext",
+]
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"

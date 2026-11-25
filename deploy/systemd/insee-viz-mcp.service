@@ -1,0 +1,28 @@
+# Run the server as a user service, so a client registered by URL finds it at login.
+#
+#   mkdir -p ~/.config/systemd/user
+#   cp deploy/systemd/insee-viz-mcp.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now insee-viz-mcp
+#
+# Bind to loopback: this listens on the machine, not on the network. Set MCP_HOST=0.0.0.0 only when
+# a reverse proxy has to reach it, and put ALLOWED_HOSTS to the real hostname at the same time.
+
+[Unit]
+Description=Insee figures MCP server (Streamable HTTP on 127.0.0.1:8000)
+Documentation=https://github.com/Mirlon382/insee-viz-mcp
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/insee-viz-mcp
+Environment=MCP_HOST=127.0.0.1
+Environment=MCP_PORT=8000
+Environment="ALLOWED_HOSTS=[\"127.0.0.1\",\"localhost\"]"
+Environment=LOG_LEVEL=INFO
+ExecStart=%h/projects/insee-viz-mcp/.venv/bin/insee-viz-mcp
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=default.target

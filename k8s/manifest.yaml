@@ -1,0 +1,152 @@
+# Kubernetes: Service, Deployment, Ingress.
+#
+# Edit two things before applying: the namespace (uncommented on each object) and the hostname -- in
+# the Ingress below AND in ALLOWED_HOSTS, or host-origin protection answers 421 to every request.
+#
+# Lists are JSON strings, exactly as `.env` holds them.
+#
+# Image: docker.io/mirlon382/insee-viz-mcp:0.2.0 (public, linux/amd64). The digest that tag pointed
+# at when this file was written is in a comment on the `image:` line; pin it there if you want the
+# deployment to be reproducible across a re-push.
+
+# -------------------------------------------------
+# 1. Service -- makes the pod reachable inside the cluster
+# -------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: insee-viz-service
+  # namespace: mcp
+spec:
+  selector:
+    app: insee-viz            # must match the Deployment label
+  ports:
+    - protocol: TCP
+      port: 80                # port exposed inside the cluster
+      targetPort: 8000        # port the container actually listens on
+  type: ClusterIP             # reachable only from inside the cluster
+
+---
+# -------------------------------------------------
+# 2. Deployment -- runs the container
+# -------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insee-viz
+  # namespace: mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insee-viz
+  template:
+    metadata:
+      labels:
+        app: insee-viz
+    spec:
+      # The image runs as the `app` user, uid/gid 1000. runAsNonRoot makes the kubelet refuse an
+      # image that would run as root instead of finding out at runtime; fsGroup gives the emptyDir
+      # below to group 1000, so the render's first write does not fail with EACCES.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: insee-viz
+          image: docker.io/mirlon382/insee-viz-mcp:0.2.0
+          # Pin instead, for a reproducible rollout:
+          # image: docker.io/mirlon382/insee-viz-mcp@sha256:3ac188e060092d59b5eb8ccc9b535abed1d0b65494f38f1b2328c8277d86aabc
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000        # matches Service.targetPort
+          env:
+            # Must contain the hostname the Ingress routes, or host-origin protection rejects
+            # every request.
+            - name: ALLOWED_HOSTS
+              value: '["insee.example.com"]'
+            # An MCP App host renders the viewer in its own iframe and does not call this origin
+            # from a browser page, so no cross-origin site is allowed.
+            - name: ALLOWED_ORIGINS
+              value: '[]'
+            # The Ingress controller reaches the pod from a cluster IP that changes, so the
+            # forwarded caller address is believed from any peer. Uvicorn otherwise trusts only
+            # 127.0.0.1, sees every request as coming from the Ingress, and rate limits every
+            # caller as one. Keep the pod reachable only through the Ingress.
+            - name: TRUSTED_PROXY_HOSTS
+              value: '["*"]'
+            # Every render writes <slug>.svg and <slug>.png here. The root filesystem is read-only
+            # (below), so this path must be the mounted volume.
+            - name: INSEE_VIZ_OUT
+              value: /data
+          securityContext:
+            allowPrivilegeEscalation: false
+            # The application writes nothing outside /data: no bytecode (PYTHONDONTWRITEBYTECODE=1
+            # in the image), no logs on disk. Turning this on is what makes the volume necessary.
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: figures
+              mountPath: /data
+          # The Dockerfile healthcheck is honoured by the kubelet; these are the probe timings.
+          # They are TCP probes on purpose: /mcp answers 400 without a session handshake, so an
+          # HTTP probe would fail on a healthy server.
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+      volumes:
+        # Scratch space for the rendered figures, not persistence:
+        # - it survives a container restart inside the same pod, and is thrown away when the pod is
+        #   rescheduled or deleted;
+        # - nothing serves this directory over HTTP. An MCP App client gets the SVG inline in
+        #   structuredContent, so the files only matter if you want to inspect them (kubectl cp,
+        #   kubectl exec) or hand them to a later job;
+        # - there is no cleanup policy, hence the size limit: a long-lived pod would otherwise keep
+        #   every figure it ever drew.
+        # To keep the figures beyond the pod's life, swap this for a PersistentVolumeClaim -- and
+        # keep fsGroup: 1000 above, or a volume owned by another uid fails on the first write.
+        - name: figures
+          emptyDir:
+            sizeLimit: 256Mi
+
+---
+# -------------------------------------------------
+# 3. Ingress -- exposes the Service outside the cluster
+# -------------------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: insee-viz-ingress
+  # namespace: mcp
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: insee.example.com       # must also be in ALLOWED_HOSTS
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: insee-viz-service    # matches Service.metadata.name
+                port:
+                  number: 80               # matches Service.port

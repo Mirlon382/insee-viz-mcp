@@ -1,0 +1,66 @@
+name: CI
+
+# Two jobs, because they fail in different ways: the first catches a broken tool or an unformatted
+# file, the second catches an image that builds and then cannot serve or draw.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: lint and test (python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      # v7 is the newest moving major tag: setup-uv publishes v10.x releases without a v10 tag.
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - run: uv sync --locked --python ${{ matrix.python-version }}
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pytest -q
+
+  image:
+    name: container image serves and draws
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t insee-viz-mcp:ci .
+      - name: Run it and wait for the healthcheck
+        run: |
+          docker run -d --name ci -p 8000:8000 -e 'ALLOWED_HOSTS=["localhost"]' insee-viz-mcp:ci
+          for attempt in $(seq 1 30); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' ci)
+            echo "health: $status"
+            [ "$status" = "healthy" ] && exit 0
+            sleep 3
+          done
+          echo "container never became healthy"; docker logs ci; exit 1
+      - name: Draw a figure inside the image
+        run: |
+          docker exec ci python -c "
+          from insee_viz_mcp.charts import render_bars
+          from insee_viz_mcp.models.figures import BarRow, BarSpec, FigureMeta
+          spec = BarSpec(
+              rows=[BarRow(label='Grands centres urbains', value=2.3), BarRow(label='Rural dispersé', value=8.1)],
+              meta=FigureMeta(title='Un titre assez long pour être valide', source='Insee, BPE 2025.'),
+              decimals=1,
+          )
+          svg = render_bars(spec)
+          assert svg.startswith('<?xml') and '<svg' in svg, svg[:200]
+          import shutil; assert shutil.which('rsvg-convert'), 'no rasteriser in the image'
+          print('rendered', len(svg), 'chars of SVG')
+          "
+      - name: Show the logs when something failed above
+        if: failure()
+        run: docker logs ci || true
